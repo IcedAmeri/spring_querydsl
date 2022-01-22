@@ -1,5 +1,6 @@
 package study.querydsl;
 
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.QueryFactory;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.ExpressionUtils;
@@ -189,7 +190,7 @@ public class QuerydslBasicTest {
      * 팀의 이름과 각 팀의 평균 연령을 구해라.
      */
     @Test
-    public void group() throws Exception {
+    public void group() {
         List<Tuple> result = queryFactory
                 .select(team.name, member.age.avg())
                 .from(member)
@@ -287,6 +288,7 @@ public class QuerydslBasicTest {
                 .where(QMember.member.username.eq("member1"))
                 .fetchOne();
 
+        assert findMember != null;
         boolean loaded = emf.getPersistenceUnitUtil().isLoaded(findMember.getTeam());
         assertThat(loaded).as("페치 조인 미적용").isFalse();
     }
@@ -302,6 +304,7 @@ public class QuerydslBasicTest {
                 .where(QMember.member.username.eq("member1"))
                 .fetchOne();
 
+        assert findMember != null;
         boolean loaded = emf.getPersistenceUnitUtil().isLoaded(findMember.getTeam());
         assertThat(loaded).as("페치 조인 미적용").isTrue();
     }
@@ -541,5 +544,30 @@ public class QuerydslBasicTest {
         for (MemberDto memberDto : result) {
             System.out.println("memberDto = " + memberDto);
         }
+    }
+
+    @Test
+    public void dynamicQuery_BooleanBuilder() {
+        String usernameParam = "member1";
+        Integer ageParam = 10;
+
+        List<Member> result = searchMember1(usernameParam, ageParam);
+    }
+
+    private List<Member> searchMember1(String usernameCond, Integer ageCond) {
+
+        BooleanBuilder builder = new BooleanBuilder();
+        if (usernameCond != null) {
+            builder.and(member.username.eq(usernameCond));
+        }
+
+        if (ageCond != null) {
+            builder.and(member.age.eq(ageCond));
+        }
+
+        return queryFactory
+                .selectFrom(member)
+                .where(builder)
+                .fetch();
     }
 }
