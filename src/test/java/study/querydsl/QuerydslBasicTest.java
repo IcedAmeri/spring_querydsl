@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import study.querydsl.dto.MemberDto;
+import study.querydsl.dto.QMemberDto;
 import study.querydsl.dto.UserDto;
 import study.querydsl.entity.Member;
 import study.querydsl.entity.QMember;
@@ -467,6 +468,7 @@ public class QuerydslBasicTest {
         }
     }
 
+    // 프로퍼티 접근
     @Test
     public void findDtoBySetter() {
         List<MemberDto> result = queryFactory
@@ -481,6 +483,7 @@ public class QuerydslBasicTest {
         }
     }
 
+    // 필드 직접 접근
     @Test
     public void findDtoByField() {
         List<MemberDto> result = queryFactory
@@ -495,6 +498,7 @@ public class QuerydslBasicTest {
         }
     }
 
+    // 생성자 사용
     @Test
     public void findDtoByConstructor() {
         List<MemberDto> result = queryFactory
@@ -509,6 +513,7 @@ public class QuerydslBasicTest {
         }
     }
 
+    // 생성자 사용 - @QueryProjections 사용 하지만 QueryDsl 의존도를 API 까지 영향
     @Test
     public void findUserDto() {
         QMember memberSub = new QMember("memberSub");
@@ -523,6 +528,18 @@ public class QuerydslBasicTest {
 
         for (UserDto userDto : result) {
             System.out.println("userDto = " + userDto);
+        }
+    }
+
+    @Test
+    public void findDtoByQueryProjection() {
+        List<MemberDto> result = queryFactory
+                .select(new QMemberDto(member.username, member.age))
+                .from(member)
+                .fetch();
+
+        for (MemberDto memberDto : result) {
+            System.out.println("memberDto = " + memberDto);
         }
     }
 }
